@@ -1,6 +1,7 @@
 import axios from "axios";
 
 const baseURL = "/api/dataset";
+const imagebaseURL = "/api/image";
 
 export default {
   allData(params) {
@@ -41,6 +42,17 @@ export default {
     form.append("coco", file);
 
     return axios.post(`${baseURL}/${id}/coco`, form, {
+      headers: {
+        "Content-Type": "multipart/form-data"
+      }
+    });
+  },
+  uploadImages(id, file) {
+    let form = new FormData();
+    form.append("image", file);
+    form.append("dataset_id", id);
+
+    return axios.post(`${imagebaseURL}/`, form, {
       headers: {
         "Content-Type": "multipart/form-data"
       }

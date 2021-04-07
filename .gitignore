@@ -11,3 +11,6 @@ dist/*
 
 docs/.vuepress/dist/*
 models/*.h5
+db/*
+docs/*
+dconfig

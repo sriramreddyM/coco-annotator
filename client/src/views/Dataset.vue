@@ -235,6 +235,22 @@
           </div>
           <div v-else>Import COCO</div>
         </button>
+      
+        <button
+          type="button"
+          class="btn btn-primary btn-block"
+          @click="imageimportModal"
+        >
+          <div v-if="importing.id != null" class="progress">
+            <div
+              class="progress-bar bg-primary"
+              :style="{ 'width': `${importing.progress}%` }"
+            >
+              Importing
+            </div>
+          </div>
+          <div v-else>Upload Images</div>
+        </button>
 
         <button
           type="button"
@@ -392,6 +408,49 @@
       </div>
     </div>
 
+    <div class="modal fade" tabindex="-1" role="dialog" id="imageUpload">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Upload Images</h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form>
+              <div class="form-group">
+                <label for="images">COCO Annotation file (.json)</label>
+                <input type="file" class="form-control-file" id="images" multiple/>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-primary"
+              @click="importImages"
+              data-dismiss="modal"
+            >
+              Upload
+            </button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="modal fade" tabindex="-1" role="dialog" id="exportDataset">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -508,6 +567,10 @@ export default {
         id: null
       },
       importing: {
+        progress: 0,
+        id: null
+      },
+      imageimporting: {
         progress: 0,
         id: null
       },
@@ -659,6 +722,15 @@ export default {
 
       $("#cocoUpload").modal("show");
     },
+    imageimportModal() {
+      if (this.imageimporting.id != null) {
+        alert("yes")
+        this.$router.push({ path: "/tasks", query: { id: this.imageimporting.id } });
+        return;
+      }
+
+      $("#imageUpload").modal("show");
+    },
     importCOCO() {
       let uploaded = document.getElementById("coco");
       Dataset.uploadCoco(this.dataset.id, uploaded.files[0])
@@ -670,6 +742,20 @@ export default {
           this.axiosReqestError("Importing COCO", error.response.data.message);
         })
         .finally(() => this.removeProcess(process));
+    },
+    importImages() {
+      let uploaded_images = document.getElementById("images");
+      for (var i = 0; i < uploaded_images.files.length; i++) {
+        Dataset.uploadImages(this.dataset.id, uploaded_images.files[i])
+          .then(response => {
+            let id = response.data.id;
+            this.imageimporting.id = id;
+          })
+        .catch(error => {
+          this.axiosReqestError("Importing Images", error.response.data.message);
+        })
+        .finally(() => this.removeProcess(process));
+      }
     },
     mouseMove(event) {
       let element = this.$refs.sidebar;
