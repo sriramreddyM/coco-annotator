@@ -241,10 +241,10 @@
           class="btn btn-primary btn-block"
           @click="imageimportModal"
         >
-          <div v-if="importing.id != null" class="progress">
+          <div v-if="imageimporting.id != null" class="progress">
             <div
               class="progress-bar bg-primary"
-              :style="{ 'width': `${importing.progress}%` }"
+              :style="{ 'width': `${imageimporting.progress}%` }"
             >
               Importing
             </div>
@@ -425,7 +425,7 @@
           <div class="modal-body">
             <form>
               <div class="form-group">
-                <label for="images">COCO Annotation file (.json)</label>
+                <label for="images">Images (.png, .jpg, etc)</label>
                 <input type="file" class="form-control-file" id="images" multiple/>
               </div>
             </form>
