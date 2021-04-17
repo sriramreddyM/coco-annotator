@@ -45,7 +45,7 @@ def create_app():
 
     flask.config.from_object(Config)
 
-    CORS(flask)
+    CORS(flask, supports_credentials=True)
 
     flask.wsgi_app = ProxyFix(flask.wsgi_app)
     flask.register_blueprint(api)

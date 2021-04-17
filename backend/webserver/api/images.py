@@ -95,7 +95,7 @@ class Images(Resource):
 
         image.close()
         pil_image.close()
-        db_image = ImageModel.create_from_path(path, dataset_id).save()
+        db_image = ImageModel.create_from_path(path, dataset_id, current_user.username).save()
         return db_image.id
 
 
