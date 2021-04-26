@@ -103,7 +103,7 @@ class Images(Resource):
 class ImageId(Resource):
 
     @api.expect(image_download)
-    @login_required
+    #@login_required
     def get(self, image_id):
         """ Returns category by ID """
         args = image_download.parse_args()
