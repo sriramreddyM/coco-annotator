@@ -163,7 +163,7 @@ class DatasetCleanMeta(Resource):
 @api.route('/<int:dataset_id>/stats')
 class DatasetStats(Resource):
 
-    @login_required
+    # @login_required
     def get(self, dataset_id):
         """ All users in the dataset """
         args = dataset_generate.parse_args()
