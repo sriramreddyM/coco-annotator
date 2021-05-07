@@ -7,19 +7,19 @@ networks:
     external: false
 
 services:
-  frontend:
-    container_name: annotator_client
-    build:
-      context: .
-      dockerfile: ./client/Dockerfile
-    ports:
-      - "8080:8080"
-    volumes:
-      - "./client:/workspace/client"
-    networks:
-      - cocoannotator
-    depends_on:
-      - webserver
+  # frontend:
+  #   container_name: annotator_client
+  #   build:
+  #     context: .
+  #     dockerfile: ./client/Dockerfile
+  #   ports:
+  #     - "8080:8080"
+  #   volumes:
+  #     - "./client:/workspace/client"
+  #   networks:
+  #     - cocoannotator
+  #   depends_on:
+  #     - webserver
   webserver:
     container_name: annotator_webserver
     build:
