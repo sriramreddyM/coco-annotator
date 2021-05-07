@@ -83,20 +83,26 @@ class Images(Resource):
             dataset = DatasetModel.objects.get(id=dataset_id)
         except:
             return {'message': 'dataset does not exist'}, 400
-        directory = dataset.directory
-        path = os.path.join(directory, image.filename)
 
-        if os.path.exists(path):
-            return {'message': 'file already exists'}, 400
+        # check if current user exists or dataset is public
+        if current_user or dataset['is_public']:
+        
+            directory = dataset.directory
+            path = os.path.join(directory, image.filename)
 
-        pil_image = Image.open(io.BytesIO(image.read()))
+            if os.path.exists(path):
+                return {'message': 'file already exists'}, 400
 
-        pil_image.save(path)
+            pil_image = Image.open(io.BytesIO(image.read()))
 
-        image.close()
-        pil_image.close()
-        db_image = ImageModel.create_from_path(path, dataset_id, current_user.username).save()
-        return db_image.id
+            pil_image.save(path)
+
+            image.close()
+            pil_image.close()
+            db_image = ImageModel.create_from_path(path, dataset_id, current_user.username).save()
+            return db_image.id
+        else:
+            return {'message': 'Upload not permitted'}, 400
 
 
 @api.route('/<int:image_id>')
@@ -195,4 +201,3 @@ class ImageCoco(Resource):
             return {"message": "You do not have permission to download the images's annotations"}, 403
 
         return coco_util.get_image_coco(image_id)
-
