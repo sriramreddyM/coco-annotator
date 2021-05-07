@@ -72,7 +72,7 @@ class Images(Resource):
         }
 
     @api.expect(image_upload)
-    @login_required
+    # @login_required
     def post(self):
         """ Creates an image """
         args = image_upload.parse_args()

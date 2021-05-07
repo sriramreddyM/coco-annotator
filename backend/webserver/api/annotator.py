@@ -9,6 +9,7 @@ from ..util import query_util, coco_util, profile, thumbnails
 from config import Config
 from database import (
     ImageModel,
+    DatasetModel,
     CategoryModel,
     AnnotationModel,
     SessionEvent
@@ -150,7 +151,8 @@ class AnnotatorData(Resource):
 class AnnotatorId(Resource):
 
     @profile
-    @login_required
+    # @login_required
+    # Add conditon if annotation to image (dataset) is_public?
     def get(self, image_id):
         """ Called when loading from the annotator client """
         image = ImageModel.objects(id=image_id)\
@@ -159,7 +161,10 @@ class AnnotatorId(Resource):
         if image is None:
             return {'success': False, 'message': 'Could not load image'}, 400
 
-        dataset = current_user.datasets.filter(id=image.dataset_id).first()
+        # until login condition set
+        # dataset = current_user.datasets.filter(id=image.dataset_id).first()
+        dataset = DatasetModel.objects(id=image.dataset_id).first()
+        # add condition if dataset is_public?
         if dataset is None:
             return {'success': False, 'message': 'Could not find associated dataset'}, 400
 
@@ -172,7 +177,10 @@ class AnnotatorId(Resource):
         nex = images.filter(file_name__gt=image.file_name).order_by('file_name').first()
 
         preferences = {}
-        if not Config.LOGIN_DISABLED:
+        if not Config.LOGIN_DISABLED and current_user.is_authenticated:
+            # change it after login_condition
+            # print(current_user)
+            # if current_user.username.:
             preferences = current_user.preferences
 
         # Generate data about the image to return to client

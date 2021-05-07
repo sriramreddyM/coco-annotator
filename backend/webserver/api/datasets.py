@@ -163,7 +163,7 @@ class DatasetCleanMeta(Resource):
 @api.route('/<int:dataset_id>/stats')
 class DatasetStats(Resource):
 
-    @login_required
+    # @login_required
     def get(self, dataset_id):
         """ All users in the dataset """
         args = dataset_generate.parse_args()
@@ -329,7 +329,8 @@ class DatasetDataId(Resource):
 
     @profile
     @api.expect(page_data)
-    @login_required
+    # @login_required
+    # ************Add condition if dataset is_publc?
     def get(self, dataset_id):
         """ Endpoint called by image viewer client """
 
