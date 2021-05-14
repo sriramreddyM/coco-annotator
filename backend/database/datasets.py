@@ -25,9 +25,10 @@ class DatasetModel(DynamicDocument):
 
     deleted = BooleanField(default=False)
     deleted_date = DateTimeField()
-    is_public = BooleanField()
 
-    is_public = BooleanField(default=False)
+    # to do
+    is_visible_public = BooleanField(default=False)
+    is_annotate_public = BooleanField(default=False)
 
     def save(self, *args, **kwargs):
 

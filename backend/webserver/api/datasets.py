@@ -460,6 +460,78 @@ class DatasetDataId(Resource):
         }
 
 
+
+
+# -----------------------------------------------------------working below -------------------------------------------------------------
+
+
+# get random image from database
+# expects dataset id and return a image for annotation
+# filetrs: cs_annotating: false & cs_annotated == [] (empty) 
+
+@api.route('/<int:dataset_id>/random_image')
+class DatasetRandomDataId(Resource):
+
+    @profile
+    # @api.expect(page_data)
+    # @login_required
+    # ************Add condition if dataset is_publc?
+    def get(self, dataset_id):
+        """ Endpoint called by cs client """
+
+        args = dict(request.args)
+
+        # Check if dataset exists
+        dataset = current_user.datasets.filter(id=dataset_id, deleted=False).first()
+        if dataset is None:
+            return {'message', 'Invalid dataset id'}, 400
+                
+        # Make sure folder starts with is in proper format
+
+        # to do
+        # until get request args use ''
+        folder = ''
+
+        if len(folder) > 0:
+            folder = folder[0].strip('/') + folder[1:]
+            if folder[-1] != '/':
+                folder = folder + '/'
+
+        # Get directory
+        directory = os.path.join(dataset.directory, folder)
+        if not os.path.exists(directory):
+            return {'message': 'Directory does not exist.'}, 400
+
+        # Initialize mongo query with required elements:
+        query_build = Q(dataset_id=dataset_id)
+        query_build &= Q(path__startswith=directory)
+        query_build &= Q(deleted=False)
+        query_build &= Q(cs_annotating=False)
+        query_build &= Q(cs_annotated=[])
+        
+        # Perform mongodb query
+        image = current_user.images \
+            .filter(query_build) \
+            .only('id', 'file_name', 'annotating', 'annotated', 'num_annotations', 'path').first()
+        
+        # set loaded to cs_annotating to lock it
+        if image is not None:
+            # to do
+            # use this update until using sockets ()
+            # 
+            image.update(set__cs_annotating=True)
+            return {
+                "image_id": image.id,
+                "image_path": image.path,
+            }
+        else:
+            return {
+                "image_id": False
+            }
+
+# -----------------------------------------------------------working on above -------------------------------------------------------------
+
+
 @api.route('/<int:dataset_id>/exports')
 class DatasetExports(Resource):
 

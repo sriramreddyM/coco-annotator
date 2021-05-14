@@ -41,6 +41,9 @@ copy_annotations = reqparse.RequestParser()
 copy_annotations.add_argument('category_ids', location='json', type=list,
                               required=False, default=None, help='Categories to copy')
 
+image_updates = reqparse.RequestParser()
+image_updates.add_argument('cs_annotating', type=bool, default=False)
+
 
 @api.route('/')
 class Images(Resource):
@@ -100,6 +103,8 @@ class Images(Resource):
             image.close()
             pil_image.close()
             db_image = ImageModel.create_from_path(path, dataset_id, current_user.username).save()
+            # to do @sriram
+            # generate thubnail immediately after uploading
             return db_image.id
         else:
             return {'message': 'Upload not permitted'}, 400
@@ -139,6 +144,8 @@ class ImageId(Resource):
 
         return send_file(image_io, attachment_filename=image.file_name, as_attachment=as_attachment)
 
+    # to do @sriram
+    # uncomment below to delete from cs
     @login_required
     def delete(self, image_id):
         """ Deletes an image by ID """
@@ -151,7 +158,18 @@ class ImageId(Resource):
 
         image.update(set__deleted=True, set__deleted_date=datetime.datetime.now())
         return {"success": True}
+    
+    @api.expect(image_updates)
+    def put(self, image_id):
+        args = image_updates.parse_args()
+        cs_annotating = args.get('cs_annotating')
 
+        image = current_user.images.filter(id=image_id, deleted=False).first()
+        if image is None:
+            return {"message": "Invalid image id"}, 400
+        
+        image.update(set__cs_annotating=cs_annotating, add_to_set__cs_annotated=current_user.username)
+        return{"message": "Updated image"}
 
 @api.route('/copy/<int:from_id>/<int:to_id>/annotations')
 class ImageCopyAnnotations(Resource):
