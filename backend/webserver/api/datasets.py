@@ -216,6 +216,27 @@ class DatasetStats(Resource):
         }
         return stats
 
+@api.route('/<int:dataset_id>/cats')
+class DatasetCats(Resource):
+
+    # @login_required
+    def get(self, dataset_id):
+        """ All users in the dataset """
+
+        dataset = current_user.datasets.filter(id=dataset_id, deleted=False).first()
+        if dataset is None:
+            return {"message": "Invalid dataset id"}, 400
+
+        category_dict = dict()
+        for category in dataset.categories:
+
+            cat_name = CategoryModel.objects(id=category).first()['name']
+            category_dict.update({str(cat_name): category})
+
+        res = {
+            'categories': category_dict,
+        }
+        return res
 
 @api.route('/<int:dataset_id>')
 class DatasetId(Resource):
