@@ -23,6 +23,9 @@ import datetime
 import json
 import os
 
+import logging
+logger = logging.getLogger('gunicorn.error')
+
 api = Namespace('dataset', description='Dataset related operations')
 
 
@@ -60,6 +63,8 @@ dataset_generate.add_argument('limit', location='json', type=int, default=100, h
 share = reqparse.RequestParser()
 share.add_argument('users', location='json', type=list, default=[], help="List of users")
 
+cs_data = reqparse.RequestParser()
+cs_data.add_argument('rejected_list', type=list, default=[])
 
 @api.route('/')
 class Dataset(Resource):
@@ -473,13 +478,14 @@ class DatasetDataId(Resource):
 class DatasetRandomDataId(Resource):
 
     @profile
-    # @api.expect(page_data)
+    @api.expect(cs_data)
     # @login_required
     # ************Add condition if dataset is_publc?
     def get(self, dataset_id):
         """ Endpoint called by cs client """
 
-        args = dict(request.args)
+        parsed_args = cs_data.parse_args()
+        rejected_list = parsed_args.get('rejected_list')
 
         # Check if dataset exists
         dataset = current_user.datasets.filter(id=dataset_id, deleted=False).first()
@@ -508,25 +514,32 @@ class DatasetRandomDataId(Resource):
         query_build &= Q(deleted=False)
         query_build &= Q(cs_annotating=False)
         query_build &= Q(cs_annotated=[])
+        query_build &= Q(id__nin=rejected_list)
+
+        logger.info(f'rejected list is {rejected_list}')
         
         # Perform mongodb query
         image = current_user.images \
             .filter(query_build) \
             .only('id', 'file_name', 'annotating', 'annotated', 'num_annotations', 'path').first()
-        
+
         # set loaded to cs_annotating to lock it
         if image is not None:
             # to do
             # use this update until using sockets ()
             # 
             image.update(set__cs_annotating=True)
+            image_id = image.id
+            image = current_user.images.filter(id=image_id, deleted=False).first()
             return {
                 "image_id": image.id,
                 "image_path": image.path,
+                "cs_annotating": image.cs_annotating,
+                "rejected_list": rejected_list
             }
         else:
             return {
-                "image_id": False
+                "image_id": None
             }
 
 # -----------------------------------------------------------working on above -------------------------------------------------------------

@@ -43,6 +43,7 @@ copy_annotations.add_argument('category_ids', location='json', type=list,
 
 image_updates = reqparse.RequestParser()
 image_updates.add_argument('cs_annotating', type=bool, default=False)
+image_updates.add_argument('is_annoatations_added', type=bool, default=False) 
 
 
 @api.route('/')
@@ -163,13 +164,21 @@ class ImageId(Resource):
     def put(self, image_id):
         args = image_updates.parse_args()
         cs_annotating = args.get('cs_annotating')
+        is_annoatations_added = args.get('is_annoatations_added')
 
         image = current_user.images.filter(id=image_id, deleted=False).first()
         if image is None:
             return {"message": "Invalid image id"}, 400
         
-        image.update(set__cs_annotating=cs_annotating, add_to_set__cs_annotated=current_user.username)
-        return{"message": "Updated image"}
+        if is_annoatations_added:
+            image.update(set__cs_annotating=cs_annotating, add_to_set__cs_annotated=current_user.username)
+        else:
+            image.update(set__cs_annotating=cs_annotating)
+
+        image_id = image.id
+        image = current_user.images.filter(id=image_id, deleted=False).first()
+        return{"message": "Updated image", "annotating": image.cs_annotating, "annotated by": image.cs_annotated}
+
 
 @api.route('/copy/<int:from_id>/<int:to_id>/annotations')
 class ImageCopyAnnotations(Resource):
