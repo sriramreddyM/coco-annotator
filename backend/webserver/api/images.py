@@ -15,6 +15,8 @@ import datetime
 import os
 import io
 
+import logging
+logger = logging.getLogger('gunicorn.error')
 
 api = Namespace('image', description='Image related operations')
 
@@ -42,9 +44,8 @@ copy_annotations.add_argument('category_ids', location='json', type=list,
                               required=False, default=None, help='Categories to copy')
 
 image_updates = reqparse.RequestParser()
-image_updates.add_argument('cs_annotating', type=bool, default=False)
-image_updates.add_argument('is_annoatations_added', type=bool, default=False) 
-
+image_updates.add_argument('cs_annotating', location='json', type=bool, default=False)
+image_updates.add_argument('is_annotations_added', location='json', type=bool, default=False) 
 
 @api.route('/')
 class Images(Resource):
@@ -163,16 +164,19 @@ class ImageId(Resource):
     @api.expect(image_updates)
     def put(self, image_id):
         args = image_updates.parse_args()
+        logger.info(f'args are, {args}')
         cs_annotating = args.get('cs_annotating')
-        is_annoatations_added = args.get('is_annoatations_added')
+        is_annotations_added = args.get('is_annotations_added')
 
         image = current_user.images.filter(id=image_id, deleted=False).first()
         if image is None:
             return {"message": "Invalid image id"}, 400
         
-        if is_annoatations_added:
+        if is_annotations_added:
+            logger.info(f'current user: {current_user.username}')
             image.update(set__cs_annotating=cs_annotating, add_to_set__cs_annotated=current_user.username)
         else:
+            logger.info(f'something wrong saving user')
             image.update(set__cs_annotating=cs_annotating)
 
         image_id = image.id

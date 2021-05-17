@@ -64,7 +64,8 @@ share = reqparse.RequestParser()
 share.add_argument('users', location='json', type=list, default=[], help="List of users")
 
 cs_data = reqparse.RequestParser()
-cs_data.add_argument('rejected_list', type=list, default=[])
+cs_data.add_argument('rejected', location='json', type=list, default=[], help="List of images to filter")
+cs_data.add_argument('dummy', location='json', type=bool, default=False)
 
 @api.route('/')
 class Dataset(Resource):
@@ -502,11 +503,12 @@ class DatasetRandomDataId(Resource):
     @api.expect(cs_data)
     # @login_required
     # ************Add condition if dataset is_publc?
-    def get(self, dataset_id):
+    def post(self, dataset_id):
         """ Endpoint called by cs client """
 
-        parsed_args = cs_data.parse_args()
-        rejected_list = parsed_args.get('rejected_list')
+        args = cs_data.parse_args()
+        # logger.info(f'cs args are, {args}')
+        rejected_list = args.get('rejected')
 
         # Check if dataset exists
         dataset = current_user.datasets.filter(id=dataset_id, deleted=False).first()
@@ -537,7 +539,7 @@ class DatasetRandomDataId(Resource):
         query_build &= Q(cs_annotated=[])
         query_build &= Q(id__nin=rejected_list)
 
-        logger.info(f'rejected list is {rejected_list}')
+        # logger.info(f'rejected list is {rejected_list}')
         
         # Perform mongodb query
         image = current_user.images \
