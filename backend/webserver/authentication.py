@@ -8,6 +8,8 @@ from database import (
     ImageModel
 )
 from uuid import uuid4
+import logging
+logger = logging.getLogger('gunicorn.error')
 
 login_manager = LoginManager()
 
@@ -82,6 +84,7 @@ def unauthorized():
 @login_manager.request_loader
 def load_user_from_request(request):
 
+    logger.info(f'Trying login')
     api_key = request.args.get('api_key')
     if api_key:
         user = UserModel.objects(api_key_iexact=api_key).first()
@@ -92,7 +95,8 @@ def load_user_from_request(request):
     if not auth:
         return None
     user = UserModel.objects(username__iexact=auth.username).first()
-    if user.api_key == '':
+    if not user.api_key:
+        logger.info(f'api key generating')
         new_api_key = uuid4()
         user.update(api_key=new_api_key)
         user = UserModel.objects(username__iexact=auth.username).first()
