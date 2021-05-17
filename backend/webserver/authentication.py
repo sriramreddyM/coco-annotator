@@ -90,6 +90,7 @@ def load_user_from_request(request):
         logger.info(f'Trying login with api key')
         user = UserModel.objects(id=api_key).first()
         if user:
+            logger.info(f'{user.username} logged in with api key')
             return user
 
     auth = request.authorization
