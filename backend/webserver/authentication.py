@@ -80,6 +80,13 @@ def unauthorized():
 
 @login_manager.request_loader
 def load_user_from_request(request):
+
+    api_key = request.args.get('api_key')
+    if api_key:
+        user = UserModel.objects(api_key_iexact=api_key).first()
+        if user:
+            return user
+
     auth = request.authorization
     if not auth:
         return None
