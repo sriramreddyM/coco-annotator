@@ -7,6 +7,7 @@ from database import (
     AnnotationModel,
     ImageModel
 )
+from uuid import uuid4
 
 login_manager = LoginManager()
 
@@ -91,6 +92,11 @@ def load_user_from_request(request):
     if not auth:
         return None
     user = UserModel.objects(username__iexact=auth.username).first()
+    if user.api_key == '':
+        new_api_key = uuid4()
+        user.update(api_key=new_api_key)
+        user = UserModel.objects(username__iexact=auth.username).first()
+
     if user and check_password_hash(user.password, auth.password):
         # login_user(user)
         return user
