@@ -77,7 +77,7 @@ class UserRegister(Resource):
         user = UserModel()
         user.username = args.get('username')
         user.password = generate_password_hash(args.get('password'), method='sha256')
-        user.api_key = uuid4()
+        # user.api_key = uuid4()
         user.name = args.get('name')
         user.email = args.get('email')
         if users == 0:
@@ -107,10 +107,10 @@ class UserLogin(Resource):
         if check_password_hash(user.password, args.get('password')):
             login_user(user)
 
-            user_api_key = user.api_key
-            if user_api_key == '':
-                user_api_key = uuid4()
-                user.update(api_key=user_api_key)
+            # user_api_key = user.api_key
+            # if user_api_key == '':
+            #     user_api_key = uuid4()
+            #     user.update(api_key=user_api_key)
             user_json = fix_ids(current_user)
             del user_json['password']
             

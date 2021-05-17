@@ -14,7 +14,7 @@ class UserModel(DynamicDocument, UserMixin):
     password = StringField(required=True)
     username = StringField(max_length=25, required=True, unique=True)
     email = StringField(max_length=30)
-    api_key = StringField(max_length=32)
+    # api_key = StringField(max_length=32)
 
     name = StringField()
     online = BooleanField(default=False)

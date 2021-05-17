@@ -88,7 +88,7 @@ def load_user_from_request(request):
     api_key = request.args.get('api_key')
     if api_key:
         logger.info(f'Trying login with api key')
-        user = UserModel.objects(api_key_iexact=api_key).first()
+        user = UserModel.objects.filter(id.$oid=api_key).first()
         if user:
             return user
 
@@ -96,11 +96,12 @@ def load_user_from_request(request):
     if not auth:
         return None
     user = UserModel.objects(username__iexact=auth.username).first()
-    if not user.api_key:
-        logger.info(f'api key generating')
-        new_api_key = uuid4()
-        user.update(api_key=new_api_key)
-        user = UserModel.objects(username__iexact=auth.username).first()
+    
+    # if not user.api_key:
+    #     logger.info(f'api key generating')
+    #     new_api_key = uuid4()
+    #     user.update(api_key=new_api_key)
+    #     user = UserModel.objects(username__iexact=auth.username).first()
 
     if user and check_password_hash(user.password, auth.password):
         # login_user(user)
