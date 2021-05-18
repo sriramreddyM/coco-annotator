@@ -566,8 +566,9 @@ class DatasetRandomDataId(Resource):
                 "rejected_list": rejected_list
             }
         else:
+            image = current_user.images.filter(cs_annotated=[]).first()    
             return {
-                "image_id": None
+                "image_id": image.id
             }
 
 # -----------------------------------------------------------working on above -------------------------------------------------------------
