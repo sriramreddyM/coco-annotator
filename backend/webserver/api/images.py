@@ -47,6 +47,10 @@ image_updates = reqparse.RequestParser()
 image_updates.add_argument('cs_annotating', location='json', type=bool, default=False)
 image_updates.add_argument('is_annotations_added', location='json', type=bool, default=False) 
 
+flag_args = reqparse.RequestParser()
+flag_args.add_argument('image_id', location='json', type=int)
+flag_args.add_argument('is_flagged', location='json', type=bool, default=False)
+
 @api.route('/')
 class Images(Resource):
 
@@ -232,3 +236,18 @@ class ImageCoco(Resource):
             return {"message": "You do not have permission to download the images's annotations"}, 403
 
         return coco_util.get_image_coco(image_id)
+
+@api.route('/flag')
+class ImageFlag(Resource):
+
+    # @login_required
+    @api.expect(flag_args)
+    def post(self, image_id):
+        
+        args = flag_args.parse_args()
+        image_id = args.get('image_id')
+        is_flag = args.get('is_flagged')
+        image = current_user.images.filter(id=image_id).first()
+        if is_flag:
+            image.update(add_to_set__cs_flagged_users=current_user.username)
+        return {'success': True}
