@@ -46,7 +46,8 @@ class ImageModel(DynamicDocument):
     # use it for external annoatation added, apart from coco-frontend
     cs_annotated = ListField(default=[])
     cs_annotating = BooleanField(default=False)
-    
+    cs_flagged_users = ListField(default=[])
+
     # Poeple currently annotation the image
     annotating = ListField(default=[])
     num_annotations = IntField(default=0)

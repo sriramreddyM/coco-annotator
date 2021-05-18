@@ -7,6 +7,7 @@ from database import UserModel
 from config import Config
 from ..util.query_util import fix_ids
 
+import datetime
 import logging
 logger = logging.getLogger('gunicorn.error')
 
@@ -80,6 +81,7 @@ class UserRegister(Resource):
         # user.api_key = uuid4()
         user.name = args.get('name')
         user.email = args.get('email')
+        user._update_last_seen()
         if users == 0:
             user.is_admin = True
         user.save()
@@ -106,7 +108,7 @@ class UserLogin(Resource):
 
         if check_password_hash(user.password, args.get('password')):
             login_user(user)
-
+            user._update_last_seen()
             # user_api_key = user.api_key
             # if user_api_key == '':
             #     user_api_key = uuid4()
@@ -130,3 +132,23 @@ class UserLogout(Resource):
         logout_user()
         return {'success': True}
 
+@api.route('/live')
+class UserLive(Resource):
+    @login_required
+    def get(self):
+        user = UserModel.objects(username__iexact=current_user.username).first()
+        user.update(last_seen=datetime.datetime.utcnow())
+        user_model = UserModel.objects
+        present_time = datetime.datetime.utcnow()
+        live_count = 0
+        for user in user_model:
+            user_last_seen = user.last_seen
+            if user_last_seen is not None:
+                if present_time > user_last_seen:
+                    td = present_time - user_last_seen
+                else:
+                    td = user_last_seen - present_time
+                td_mins = int(round(td.total_seconds() / 60))
+                if td_mins <= 3:
+                    live_count += 1
+        return {'success': True, 'live_count': live_count}

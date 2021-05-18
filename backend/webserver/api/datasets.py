@@ -179,6 +179,7 @@ class DatasetStats(Resource):
             return {"message": "Invalid dataset id"}, 400
 
         images = ImageModel.objects(dataset_id=dataset.id, deleted=False)
+        num_images_cs_not_annotated = len(ImageModel.objects(dataset_id=dataset.id, cs_annotated=[], deleted=False))
         annotated_images = images.filter(annotated=True)
         annotations = AnnotationModel.objects(dataset_id=dataset_id, deleted=False)
 
@@ -201,6 +202,7 @@ class DatasetStats(Resource):
                 'Users': dataset.get_users().count(),
                 'Images': images.count(),
                 'Annotated Images': annotated_images.count(),
+                'CS Annotated Images': num_images_cs_not_annotated,
                 'Annotations': annotations.count(),
                 'Categories': len(dataset.categories),
                 'Time Annotating (s)': (images.sum('milliseconds') or 0) / 1000
