@@ -705,7 +705,7 @@ class DatasetRefresh(Resource):
     
     @api.expect(dataset_refresh)
     @login_required
-    def get(self, dataset_id):
+    def post(self, dataset_id):
 
         args = dataset_refresh.parse_args()
         dataset_id = args['dataset_id']
