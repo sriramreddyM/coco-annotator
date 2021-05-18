@@ -551,11 +551,12 @@ class DatasetRandomDataId(Resource):
             .filter(query_build) \
             .only('id', 'file_name', 'annotating', 'annotated', 'num_annotations', 'path').first()
 
-        if rejected_list[-1]:
-            unlock_image = current_user.images.filter(id=rejected_list[-1], cs_annotated=[]).first()
-            if unlock_image:
-                logger.info(f'unlocking rejected image, {rejected_list[-1]}')
-                unlock_image.update(cs_annotating=False)
+        if len(rejected_list):
+            if rejected_list[-1]:
+                unlock_image = current_user.images.filter(id=rejected_list[-1], cs_annotated=[]).first()
+                if unlock_image:
+                    logger.info(f'unlocking rejected image, {rejected_list[-1]}')
+                    unlock_image.update(cs_annotating=False)
         
         # set loaded to cs_annotating to lock it
         if image is not None:
