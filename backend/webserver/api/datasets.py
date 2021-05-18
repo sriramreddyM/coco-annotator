@@ -697,3 +697,16 @@ class DatasetScan(Resource):
         
         return dataset.scan()
 
+@api.route('/cs_refersh')
+class DatasetRefresh(Resource):
+    
+    @login_required
+    def get(self, dataset_id):
+
+        images = ImageModel.objects(dataset_id=dataset_id)
+        image_refresh_count = 0
+        for image in images:
+            if image.cs_annotating == True and image.cs_annotated != []:
+                image.update(cs_annotating=False)
+                image_refresh_count += 1
+        return {'image_refresh_count': image_refresh_count}
