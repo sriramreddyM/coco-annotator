@@ -67,6 +67,9 @@ cs_data = reqparse.RequestParser()
 cs_data.add_argument('rejected', location='json', type=list, default=[], help="List of images to filter")
 cs_data.add_argument('dummy', location='json', type=bool, default=False)
 
+dataset_refresh = reqparse.RequestParser()
+dataset_refresh.add_argument('dataset_id', location='json', type=int)
+
 @api.route('/')
 class Dataset(Resource):
     @login_required
@@ -700,8 +703,12 @@ class DatasetScan(Resource):
 @api.route('/cs_refersh')
 class DatasetRefresh(Resource):
     
+    @api.expect(dataset_refresh)
     @login_required
     def get(self, dataset_id):
+
+        args = dataset_refresh.parse_args()
+        dataset_id = args['dataset_id']
 
         images = ImageModel.objects(dataset_id=dataset_id)
         image_refresh_count = 0
