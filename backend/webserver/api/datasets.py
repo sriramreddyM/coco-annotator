@@ -700,15 +700,15 @@ class DatasetScan(Resource):
         
         return dataset.scan()
 
-@api.route('/cs_refersh')
+@api.route('/<int:dataset_id>/cs_refersh')
 class DatasetRefresh(Resource):
     
-    @api.expect(dataset_refresh)
+    # @api.expect(dataset_refresh)
     @login_required
-    def post(self, dataset_id):
+    def get(self, dataset_id):
 
-        args = dataset_refresh.parse_args()
-        dataset_id = args['dataset_id']
+        # args = dataset_refresh.parse_args()
+        # dataset_id = args['dataset_id']
 
         images = ImageModel.objects(dataset_id=dataset_id)
         image_refresh_count = 0
