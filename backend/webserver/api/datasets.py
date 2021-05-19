@@ -728,6 +728,6 @@ class DatasetRefresh(Resource):
             if image.cs_annotated != []:
                 image_annotated_count += 1
             else:
-                image.update(set__cs_annotating=False)
+                image.update(set__cs_annotating=False, set__cs_annotated=[])
                 image_refresh_count += 1
         return {'image_refresh_count': image_refresh_count, 'total_image_count': image_count, 'images': image_json}
