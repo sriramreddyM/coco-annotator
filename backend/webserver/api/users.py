@@ -81,10 +81,10 @@ class UserRegister(Resource):
         # user.api_key = uuid4()
         user.name = args.get('name')
         user.email = args.get('email')
-        user._update_last_seen()
         if users == 0:
             user.is_admin = True
         user.save()
+        user._update_last_seen()
 
         login_user(user)
 
