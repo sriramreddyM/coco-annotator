@@ -721,10 +721,13 @@ class DatasetRefresh(Resource):
 
         images = ImageModel.objects(dataset_id=dataset_id)
         image_refresh_count = 0
+        image_annotated_count = 0
         image_count = images.count()
         image_json = query_util.fix_ids(images)
         for image in images:
-            if image.cs_annotating == True and image.cs_annotated == []:
-                image.update(cs_annotating=False)
+            if image.cs_annotated != []:
+                image_annotated_count += 1
+            else:
+                image.update(set__cs_annotating=False)
                 image_refresh_count += 1
         return {'image_refresh_count': image_refresh_count, 'total_image_count': image_count, 'images': image_json}
