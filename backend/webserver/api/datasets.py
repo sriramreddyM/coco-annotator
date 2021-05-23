@@ -222,6 +222,28 @@ class DatasetStats(Resource):
         }
         return stats
 
+@api.route('/<int:dataset_id>/cs_stats')
+class DatasetcsStats(Resource):
+
+    # @login_required
+    def get(self, dataset_id):
+        """ All users in the dataset """
+
+        dataset = current_user.datasets.filter(id=dataset_id, deleted=False).first()
+        if dataset is None:
+            return {"message": "Invalid dataset id"}, 400
+
+        images = ImageModel.objects(dataset_id=dataset.id, deleted=False)
+        num_images_cs_not_annotated = len(ImageModel.objects(dataset_id=dataset.id, cs_annotated=[], deleted=False))
+
+        cs_stats = {
+            'total': {
+                'Images': images.count(),
+                'CS Annotated Images': num_images_cs_not_annotated,
+            }
+        }
+        return cs_stats
+
 @api.route('/<int:dataset_id>/cats')
 class DatasetCats(Resource):
 

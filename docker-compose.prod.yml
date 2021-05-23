@@ -1,0 +1,98 @@
+version: "3"
+volumes:
+  mongodb_data:
+    external: false
+networks:
+  cocoannotator:
+    external: false
+
+services:
+  webserver:
+    container_name: annotator_webserver
+    build:
+      context: .
+      dockerfile: ./backend/webserver/Dockerfile
+    ports:
+      - 5000:5000
+    volumes:
+      - "./backend/config:/workspace/config"
+      - "./backend/webserver:/workspace/webserver"
+      - "./backend/workers:/workspace/workers"
+      - "./backend/database:/workspace/database"
+      - "./datasets:/datasets"
+      - "./models:/models"
+    environment:
+      - FILE_WATCHER=true
+      - FLASK_APP=webserver
+      - FLASK_ENV=production
+      - DEBUG=false
+    networks:
+      - cocoannotator
+    depends_on:
+      - database
+      - workers
+  webserver:
+    container_name: annotator_webserver2
+    build:
+      context: .
+      dockerfile: ./backend/webserver/Dockerfile
+    ports:
+      - 5001:5000
+    volumes:
+      - "./backend/config:/workspace/config"
+      - "./backend/webserver:/workspace/webserver"
+      - "./backend/workers:/workspace/workers"
+      - "./backend/database:/workspace/database"
+      - "./datasets:/datasets"
+      - "./models:/models"
+    environment:
+      - FILE_WATCHER=true
+      - FLASK_APP=webserver
+      - FLASK_ENV=production
+      - DEBUG=false
+    networks:
+      - cocoannotator
+    depends_on:
+      - database
+      - workers
+  workers:
+    container_name: annotator_workers
+    build:
+      context: .
+      dockerfile: ./backend/workers/Dockerfile
+    volumes:
+      - "./backend/config:/workspace/config"
+      - "./backend/webserver:/workspace/webserver"
+      - "./backend/workers:/workspace/workers"
+      - "./backend/database:/workspace/database"
+      - "./datasets:/datasets"
+    depends_on:
+      - messageq
+      - database
+    ports:
+      - 5555:5555
+    networks:
+      - cocoannotator
+  database:
+    image: mongo:4.0
+    container_name: annotator_mongodb
+    environment:
+      - MONGO_DATA_DIR=/data/db
+      - MONGO_LOG_DIR=/dev/null
+    volumes:
+      - "mongodb_data:/data/db"
+    ports:
+      - "27017:27017"
+    command: "mongod --smallfiles --logpath=/dev/null"
+    networks:
+      - cocoannotator
+  messageq:
+    image: rabbitmq:3
+    container_name: annotator_message_q
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=password
+    ports:
+      - 5672:5672
+    networks:
+      - cocoannotator
