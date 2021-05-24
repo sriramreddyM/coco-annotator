@@ -31,7 +31,7 @@ services:
     depends_on:
       - database
       - workers
-  webserver:
+  webserver2:
     container_name: annotator_webserver2
     build:
       context: .
