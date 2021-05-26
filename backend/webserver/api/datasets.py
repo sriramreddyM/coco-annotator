@@ -233,8 +233,8 @@ class DatasetcsStats(Resource):
         if dataset is None:
             return {"message": "Invalid dataset id"}, 400
 
-        images = ImageModel.objects(dataset_id=dataset.id, deleted=False)
-        num_images_cs_not_annotated = len(ImageModel.objects(dataset_id=dataset.id, cs_annotated=[], deleted=False))
+        images = ImageModel.objects.filter(dataset_id=dataset.id, deleted=False).only('id')
+        num_images_cs_not_annotated = len(ImageModel.objects.filter(dataset_id=dataset.id, cs_annotated=[], deleted=False).only('id'))
 
         cs_stats = {
             'total': {
