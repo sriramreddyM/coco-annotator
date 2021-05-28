@@ -621,7 +621,7 @@ class DatasetCsrandomDataId(Resource):
         dataset_ids = []
 
         for dataset in datasets:
-            dataset_ids.append(dataset.get('id'))
+            dataset_ids.append(dataset.id)
         # if dataset is None:
             # return {'message', 'Invalid dataset id'}, 400
                 
