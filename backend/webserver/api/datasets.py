@@ -601,6 +601,85 @@ class DatasetRandomDataId(Resource):
                 "all_images_locked": True
             }
 
+
+@api.route('/<int:dataset_id>/cs_random_image')
+class DatasetCsrandomDataId(Resource):
+
+    @profile
+    @api.expect(cs_data)
+    # @login_required
+    # ************Add condition if dataset is_publc?
+    def post(self, dataset_id):
+        """ Endpoint called by cs client """
+
+        args = cs_data.parse_args()
+        # logger.info(f'cs args are, {args}')
+        rejected_list = args.get('rejected')
+
+        # Check if dataset exists
+        # dataset = current_user.datasets.filter(id=dataset_id, deleted=False).first()
+        # if dataset is None:
+            # return {'message', 'Invalid dataset id'}, 400
+                
+        # Make sure folder starts with is in proper format
+
+        # to do
+        # until get request args use ''
+        folder = ''
+
+        if len(folder) > 0:
+            folder = folder[0].strip('/') + folder[1:]
+            if folder[-1] != '/':
+                folder = folder + '/'
+
+        # Get directory
+        directory = os.path.join(dataset.directory, folder)
+        if not os.path.exists(directory):
+            return {'message': 'Directory does not exist.'}, 400
+
+        # Initialize mongo query with required elements:
+        # query_build = Q(dataset_id=dataset_id)
+        query_build = Q(path__startswith=directory)
+        query_build &= Q(deleted=False)
+        query_build &= Q(cs_annotating=False)
+        query_build &= Q(cs_annotated=[])
+        query_build &= Q(id__nin=rejected_list)
+
+        # logger.info(f'rejected list is {rejected_list}')
+        
+        # Perform mongodb query
+        image = current_user.images \
+            .filter(query_build) \
+            .only('id', 'file_name', 'annotating', 'annotated', 'num_annotations', 'path').first()
+
+        if len(rejected_list):
+            if rejected_list[-1]:
+                unlock_image = current_user.images.filter(id=rejected_list[-1], cs_annotated=[]).first()
+                if unlock_image:
+                    logger.info(f'unlocking rejected image, {rejected_list[-1]}')
+                    unlock_image.update(cs_annotating=False)
+        
+        # set loaded to cs_annotating to lock it
+        if image is not None:
+            # to do
+            # use this update until using sockets ()
+            # 
+            image.update(set__cs_annotating=True)
+            image_id = image.id
+            image = current_user.images.filter(id=image_id, deleted=False).first()
+            return {
+                "image_id": image.id,
+                "image_path": image.path,
+                "cs_annotating": image.cs_annotating,
+                "rejected_list": rejected_list
+            }
+        else:
+            image = current_user.images.filter(cs_annotated=[]).first()    
+            return {
+                "image_id": image.id,
+                "all_images_locked": True
+            }
+
 # -----------------------------------------------------------working on above -------------------------------------------------------------
 
 
