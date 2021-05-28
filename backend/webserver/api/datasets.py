@@ -617,7 +617,11 @@ class DatasetCsrandomDataId(Resource):
         rejected_list = args.get('rejected')
 
         # Check if dataset exists
-        # dataset = current_user.datasets.filter(id=dataset_id, deleted=False).first()
+        datasets = current_user.datasets.filter(deleted=False).only('id')
+        dataset_ids = []
+
+        for dataset in datasets:
+            dataset_ids.append(dataset.get('id'))
         # if dataset is None:
             # return {'message', 'Invalid dataset id'}, 400
                 
@@ -638,8 +642,8 @@ class DatasetCsrandomDataId(Resource):
             return {'message': 'Directory does not exist.'}, 400
 
         # Initialize mongo query with required elements:
-        # query_build = Q(dataset_id=dataset_id)
-        query_build = Q(path__startswith=directory)
+        query_build = Q(dataset_id__in=dataset_ids)
+        query_build &= Q(path__startswith=directory)
         query_build &= Q(deleted=False)
         query_build &= Q(cs_annotating=False)
         query_build &= Q(cs_annotated=[])
