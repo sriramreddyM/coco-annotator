@@ -212,4 +212,69 @@ class AnnotatorId(Resource):
 
         return data
 
+@api.route('/cs_data/<int:image_id>')
+class AnnotatorcsId(Resource):
+
+    @profile
+    # @login_required
+    # Add conditon if annotation to image (dataset) is_public?
+    def get(self, image_id):
+        """ Called when loading from the annotator client """
+        image = ImageModel.objects(id=image_id)\
+            .exclude('events').first()
+
+        if image is None:
+            return {'success': False, 'message': 'Could not load image'}, 400
+
+        # until login condition set
+        # dataset = current_user.datasets.filter(id=image.dataset_id).first()
+        dataset = DatasetModel.objects(id=image.dataset_id).first()
+        # add condition if dataset is_public?
+        if dataset is None:
+            return {'success': False, 'message': 'Could not find associated dataset'}, 400
+
+        categories = CategoryModel.objects(deleted=False)\
+            .in_bulk(dataset.categories).items()
+
+        # Get next and previous image
+        # images = ImageModel.objects(dataset_id=dataset.id, deleted=False)
+        # pre = images.filter(file_name__lt=image.file_name).order_by('-file_name').first()
+        # nex = images.filter(file_name__gt=image.file_name).order_by('file_name').first()
+
+        # preferences = {}
+        # if not Config.LOGIN_DISABLED and current_user.is_authenticated:
+        #     # change it after login_condition
+        #     # print(current_user)
+        #     # if current_user.username.:
+        #     preferences = current_user.preferences
+
+        # Generate data about the image to return to client
+        data = {
+            'image': query_util.fix_ids(image),
+            'categories': [],
+            'dataset': query_util.fix_ids(dataset)
+            # 'preferences': preferences,
+            # 'permissions': {
+                # 'dataset': dataset.permissions(current_user),
+                # 'image': image.permissions(current_user)
+            }
+        }
+
+        # data['image']['previous'] = pre.id if pre else None
+        # data['image']['next'] = nex.id if nex else None
+
+        for category in categories:
+            category = query_util.fix_ids(category[1])
+
+            category_id = category.get('id')
+            annotations = AnnotationModel.objects(image_id=image_id, category_id=category_id, deleted=False)\
+                .exclude('events').all()
+
+            category['show'] = True
+            category['visualize'] = False
+            category['annotations'] = [] if annotations is None else query_util.fix_ids(annotations)
+            data.get('categories').append(category)
+
+        return data
+
 
