@@ -257,7 +257,7 @@ class AnnotatorcsId(Resource):
             # 'permissions': {
                 # 'dataset': dataset.permissions(current_user),
                 # 'image': image.permissions(current_user)
-            }
+            # }
         }
 
         # data['image']['previous'] = pre.id if pre else None
