@@ -27,7 +27,7 @@ create_annotation.add_argument('color', location='json')
 
 update_annotation = reqparse.RequestParser()
 update_annotation.add_argument('category_id', type=int, location='json')
-update_annotation.add_argument('bbox', type=list, location='json')
+update_annotation.add_argument('bbox', type=list, location='json', default=[])
 update_annotation.add_argument('segmentation', type=list, location='json')
 
 @api.route('/')
@@ -124,7 +124,7 @@ class AnnotationId(Resource):
         args = update_annotation.parse_args()
 
         new_category_id = args.get('category_id')
-        new_bbox = args.get('bbox', [])   
+        new_bbox = args.get('bbox', [])
         new_segmentation = args.get('segmentation', [])
  
         if len(new_bbox) == 0:
