@@ -284,7 +284,10 @@ def import_annotations(task_id, dataset_id, coco_json):
 
             image_categories.append(category_id)
         else:
-            annotation_model.update(deleted=False, isbbox=isbbox)
+            if isbbox:
+                annotation_model.update(deleted=False, bbox=bbox, segmentation=[], isbbox=isbbox)
+            else:
+                annotation_model.update(deleted=False, isbbox=isbbox)
             task.info(
                 f"Annotation already exists (i:{image_id}, c:{category_id})")
 
