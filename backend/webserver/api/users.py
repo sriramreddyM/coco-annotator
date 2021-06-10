@@ -124,7 +124,7 @@ class UserLogin(Resource):
         return {'success': False, 'message': 'Could not authenticate user'}, 400
 
 @api.route('/login/token')
-class UserLogin(Resource):
+class UserTokenLogin(Resource):
     @api.expect(login)
     def post(self):
         """ Logs user in """
