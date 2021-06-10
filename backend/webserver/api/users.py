@@ -150,7 +150,7 @@ class UserTokenLogin(Resource):
             logger.info(f'User {current_user.username} has LOGIN')
 
             token = jwt.encode({
-                'sub': user.email,
+                'sub': user.username,
                 'iat':datetime.utcnow(),
                 'exp': datetime.utcnow() + timedelta(minutes=300)},
                 Config.SECRET_KEY)

@@ -87,35 +87,14 @@ def unauthorized():
 @login_manager.request_loader
 def load_user_from_request(request):
 
-    auth_headers = request.headers.get('Authorization', '').split()
-    logger.info(f'Trying login user from token, {auth_headers}')
-
-    invalid_msg = {
-        'message': 'Invalid token. Registeration and / or authentication required',
-        'authenticated': False
-    }
-    expired_msg = {
-        'message': 'Expired token. Reauthentication required.',
-        'authenticated': False
-    }
-
-    # if len(auth_headers) != 2:
-        # return jsonify(invalid_msg), 401
-    
-    try:
-        token = auth_headers[0]
-        data = jwt.decode(token, current_app.config['SECRET_KEY'])
-
-        user = UserModel.objects(email=data['sub']).first()
-        logger.info(f'{user.username} tried logged in')
-        if not user:
-            raise RuntimeError('User not found')
-        return user
-    except jwt.ExpiredSignatureError:
-        return jsonify(expired_msg), 401 # 401 is Unauthorized HTTP status code
-    except (jwt.InvalidTokenError, Exception) as e:
-        # print(e)
-        return jsonify(invalid_msg), 401
+    token = request.headers.get('Authorization')
+    # logger.info(f'Trying login user from token, {token}')
+    if token:
+        decoded_token = jwt.decode(token, Config.SECRET_KEY)
+        logger.info(f'Trying login user from token, {decoded_token['sub']}')
+        user = User.query.filter_by(username=decoded_token['sub']).first()
+        if user:
+            return user
     return None
 
 
