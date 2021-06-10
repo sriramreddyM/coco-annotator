@@ -9,6 +9,8 @@ from ..util.query_util import fix_ids
 
 from datetime import datetime, timedelta
 import jwt
+from flask import jsonify
+
 import logging
 logger = logging.getLogger('gunicorn.error')
 
