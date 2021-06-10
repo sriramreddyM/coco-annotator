@@ -87,9 +87,8 @@ def unauthorized():
 @login_manager.request_loader
 def load_user_from_request(request):
 
-    logger.info(f'Trying login user from token')
-
     auth_headers = request.headers.get('Authorization', '').split()
+    logger.info(f'Trying login user from token, {auth_headers[1]}')
 
     invalid_msg = {
         'message': 'Invalid token. Registeration and / or authentication required',
@@ -117,7 +116,7 @@ def load_user_from_request(request):
     except (jwt.InvalidTokenError, Exception) as e:
         # print(e)
         return jsonify(invalid_msg), 401
-
+    return None
 
 
 
