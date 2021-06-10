@@ -106,7 +106,7 @@ def load_user_from_request(request):
     try:
         token = auth_headers[1]
         data = jwt.decode(token, current_app.config['SECRET_KEY'])
-        user = User.query.filter_by(email=data['sub']).first()
+        user = UserModel.objects(email=data['sub']).first()
         if not user:
             raise RuntimeError('User not found')
         return user
