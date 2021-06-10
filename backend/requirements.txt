@@ -25,4 +25,4 @@ h5py
 imgaug
 IPython[all]
 jupyter
-PyJWT
+PyJWT==1.7.1
