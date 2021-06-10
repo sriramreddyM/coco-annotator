@@ -8,6 +8,8 @@ from database import (
     ImageModel
 )
 from uuid import uuid4
+import jwt
+
 import logging
 logger = logging.getLogger('gunicorn.error')
 

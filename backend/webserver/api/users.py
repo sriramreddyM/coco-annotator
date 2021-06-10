@@ -7,7 +7,8 @@ from database import UserModel
 from config import Config
 from ..util.query_util import fix_ids
 
-import datetime
+from datetime import datetime, timedelta
+import jwt
 import logging
 logger = logging.getLogger('gunicorn.error')
 
@@ -122,6 +123,39 @@ class UserLogin(Resource):
 
         return {'success': False, 'message': 'Could not authenticate user'}, 400
 
+@api.route('/login/token')
+class UserLogin(Resource):
+    @api.expect(login)
+    def post(self):
+        """ Logs user in """
+        args = login.parse_args()
+        username = args.get('username')
+
+        user = UserModel.objects(username__iexact=username).first()
+        if user is None:
+            return {'success': False, 'message': 'Could not authenticate user'}, 400
+
+        if check_password_hash(user.password, args.get('password')):
+            login_user(user)
+            user._update_last_seen()
+            # user_api_key = user.api_key
+            # if user_api_key == '':
+            #     user_api_key = uuid4()
+            #     user.update(api_key=user_api_key)
+            user_json = fix_ids(current_user)
+            del user_json['password']
+            
+            logger.info(f'User {current_user.username} has LOGIN')
+
+            token = jwt.encode({
+                'sub': user.email,
+                'iat':datetime.utcnow(),
+                'exp': datetime.utcnow() + timedelta(minutes=30)},
+                Config.SECRET_KEY)
+
+            return jsonify({ 'token': token.decode('UTF-8') })
+
+        return {'success': False, 'message': 'Could not authenticate user'}, 400
 
 @api.route('/logout')
 class UserLogout(Resource):
@@ -137,9 +171,9 @@ class UserLive(Resource):
     @login_required
     def get(self):
         user = UserModel.objects(username__iexact=current_user.username).first()
-        user.update(last_seen=datetime.datetime.utcnow())
+        user.update(last_seen=datetime.utcnow())
         user_model = UserModel.objects
-        present_time = datetime.datetime.utcnow()
+        present_time = datetime.utcnow()
         live_count = 0
         for user in user_model:
             user_last_seen = user.last_seen

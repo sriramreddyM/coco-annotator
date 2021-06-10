@@ -25,3 +25,4 @@ h5py
 imgaug
 IPython[all]
 jupyter
+PyJWT

@@ -272,7 +272,11 @@ def import_annotations(task_id, dataset_id, coco_json):
             annotation_model.metadata = annotation.get('metadata', {})
 
             if has_segmentation:
-                annotation_model.segmentation = segmentation
+                if isbbox:
+                    annotation_model.segmentation = []
+                else:
+                    annotation_model.segmentation = segmentation
+
                 annotation_model.area = area
                 annotation_model.bbox = bbox
 

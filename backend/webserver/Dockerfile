@@ -2,9 +2,11 @@ FROM jsbroks/coco-annotator:python-env
 
 WORKDIR /workspace/
 
-# Install python package dependices
 COPY ./backend/ /workspace/
 COPY ./.git /workspace/.git
+
+RUN pip install -r requirements.txt
+
 RUN python set_path.py
 
 ENV FLASK_ENV=development
