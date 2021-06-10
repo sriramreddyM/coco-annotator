@@ -99,11 +99,11 @@ def load_user_from_request(request):
         'authenticated': False
     }
 
-    if len(auth_headers) != 2:
-        return jsonify(invalid_msg), 401
+    # if len(auth_headers) != 2:
+        # return jsonify(invalid_msg), 401
     
     try:
-        token = auth_headers[1]
+        token = auth_headers[0]
         data = jwt.decode(token, current_app.config['SECRET_KEY'])
 
         user = UserModel.objects(email=data['sub']).first()
