@@ -7,6 +7,7 @@ from database import (
     AnnotationModel,
     ImageModel
 )
+from config import Config
 from uuid import uuid4
 from flask import jsonify
 import jwt
