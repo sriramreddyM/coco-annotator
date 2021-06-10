@@ -152,7 +152,7 @@ class UserTokenLogin(Resource):
             token = jwt.encode({
                 'sub': user.email,
                 'iat':datetime.utcnow(),
-                'exp': datetime.utcnow() + timedelta(minutes=30)},
+                'exp': datetime.utcnow() + timedelta(minutes=300)},
                 Config.SECRET_KEY)
 
             return jsonify({ 'token': token.decode('UTF-8') })

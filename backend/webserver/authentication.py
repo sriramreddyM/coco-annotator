@@ -8,6 +8,7 @@ from database import (
     ImageModel
 )
 from uuid import uuid4
+from flask import jsonify
 import jwt
 
 import logging
@@ -86,27 +87,58 @@ def unauthorized():
 @login_manager.request_loader
 def load_user_from_request(request):
 
-    logger.info(f'Trying login')
-    api_key = request.args.get('api_key')
-    if api_key and len(api_key) == 24:
-        logger.info(f'Trying login with api key')
-        user = UserModel.objects(id=api_key).first()
-        if user:
-            logger.info(f'{user.username} logged in with api key')
-            return user
+    logger.info(f'Trying login user from token')
 
-    auth = request.authorization
-    if not auth:
-        return None
-    user = UserModel.objects(username__iexact=auth.username).first()
+    auth_headers = request.headers.get('Authorization', '').split()
+
+    invalid_msg = {
+        'message': 'Invalid token. Registeration and / or authentication required',
+        'authenticated': False
+    }
+    expired_msg = {
+        'message': 'Expired token. Reauthentication required.',
+        'authenticated': False
+    }
+
+    if len(auth_headers) != 2:
+        return jsonify(invalid_msg), 401
     
-    # if not user.api_key:
-    #     logger.info(f'api key generating')
-    #     new_api_key = uuid4()
-    #     user.update(api_key=new_api_key)
-    #     user = UserModel.objects(username__iexact=auth.username).first()
-
-    if user and check_password_hash(user.password, auth.password):
-        # login_user(user)
+    try:
+        token = auth_headers[1]
+        data = jwt.decode(token, current_app.config['SECRET_KEY'])
+        user = User.query.filter_by(email=data['sub']).first()
+        if not user:
+            raise RuntimeError('User not found')
         return user
-    return None
+    except jwt.ExpiredSignatureError:
+        return jsonify(expired_msg), 401 # 401 is Unauthorized HTTP status code
+    except (jwt.InvalidTokenError, Exception) as e:
+        # print(e)
+        return jsonify(invalid_msg), 401
+
+
+
+
+    # api_key = request.args.get('api_key')
+    # if api_key and len(api_key) == 24:
+    #     logger.info(f'Trying login with api key')
+    #     user = UserModel.objects(id=api_key).first()
+    #     if user:
+    #         logger.info(f'{user.username} logged in with api key')
+    #         return user
+
+    # auth = request.authorization
+    # if not auth:
+    #     return None
+    # user = UserModel.objects(username__iexact=auth.username).first()
+    
+    # # if not user.api_key:
+    # #     logger.info(f'api key generating')
+    # #     new_api_key = uuid4()
+    # #     user.update(api_key=new_api_key)
+    # #     user = UserModel.objects(username__iexact=auth.username).first()
+
+    # if user and check_password_hash(user.password, auth.password):
+    #     # login_user(user)
+    #     return user
+    # return None
