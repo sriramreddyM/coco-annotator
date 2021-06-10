@@ -88,7 +88,7 @@ def unauthorized():
 def load_user_from_request(request):
 
     auth_headers = request.headers.get('Authorization', '').split()
-    logger.info(f'Trying login user from token, {auth_headers[1]}')
+    logger.info(f'Trying login user from token, {auth_headers}')
 
     invalid_msg = {
         'message': 'Invalid token. Registeration and / or authentication required',
