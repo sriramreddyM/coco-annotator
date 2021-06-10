@@ -91,7 +91,7 @@ def load_user_from_request(request):
     # logger.info(f'Trying login user from token, {token}')
     if token:
         decoded_token = jwt.decode(token, Config.SECRET_KEY)
-        logger.info(f'Trying login user from token, {decoded_token['sub']}')
+        logger.info(f'Trying login user from token, {decoded_token["sub"]}')
         user = User.query.filter_by(username=decoded_token['sub']).first()
         if user:
             return user
