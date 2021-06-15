@@ -231,7 +231,6 @@ class DatasetcsStats(Resource):
     def get(self, dataset_id):
         """ All users in the dataset """
         global dataset_stats
-        logger.info('cs_stats')
         if dataset_id in dataset_stats:
             last_updated = dataset_stats[dataset_id]['last_updated']
             present_time = datetime.datetime.now()
@@ -249,26 +248,26 @@ class DatasetcsStats(Resource):
             else:
                 pass
 
-            dataset_stats[dataset_id]['updating_now'] = True
+        dataset_stats[dataset_id]['updating_now'] = True
 
-            dataset = current_user.datasets.filter(id=dataset_id, deleted=False).first()
-            if dataset is None:
-                return {"message": "Invalid dataset id"}, 400
+        dataset = current_user.datasets.filter(id=dataset_id, deleted=False).first()
+        if dataset is None:
+            return {"message": "Invalid dataset id"}, 400
 
-            images = ImageModel.objects.filter(dataset_id=dataset.id, deleted=False).only('id')
-            num_images_cs_not_annotated = len(ImageModel.objects.filter(dataset_id=dataset.id, cs_annotated=[], deleted=False).only('id'))
+        images = ImageModel.objects.filter(dataset_id=dataset.id, deleted=False).only('id')
+        num_images_cs_not_annotated = len(ImageModel.objects.filter(dataset_id=dataset.id, cs_annotated=[], deleted=False).only('id'))
 
-            cs_stats = {
-                'total': {
-                    'Images': images.count(),
-                    'CS Annotated Images': num_images_cs_not_annotated,
-                },
-                'last_updated': datetime.datetime.now(),
-                'updating_now': False
-            }
-            dataset_stats[dataset_id] = cs_stats
-            logger.info('cs_stats fetched and write to variable')
-            return cs_stats
+        cs_stats = {
+            'total': {
+                'Images': images.count(),
+                'CS Annotated Images': num_images_cs_not_annotated,
+            },
+            'last_updated': datetime.datetime.now(),
+            'updating_now': False
+        }
+        dataset_stats[dataset_id] = cs_stats
+        logger.info('cs_stats fetched and write to variable')
+        return cs_stats
 
 @api.route('/<int:dataset_id>/cats')
 class DatasetCats(Resource):
