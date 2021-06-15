@@ -231,6 +231,7 @@ class DatasetcsStats(Resource):
     def get(self, dataset_id):
         """ All users in the dataset """
         global dataset_stats
+        logger.info('cs_stats')
         if dataset_id in dataset_stats:
             last_updated = dataset_stats[dataset_id]['last_updated']
             present_time = datetime.datetime.now()
