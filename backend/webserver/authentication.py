@@ -91,6 +91,7 @@ def load_user_from_request(request):
     token = request.headers.get('Authorization')
     # logger.info(f'Trying login user from token, {token}')
     if token:
+        # try exception method to do
         decoded_token = jwt.decode(token, Config.SECRET_KEY)
         logger.info(f'Trying login user from token, {decoded_token["sub"]}')
         user = UserModel.objects(username=decoded_token['sub']).first()

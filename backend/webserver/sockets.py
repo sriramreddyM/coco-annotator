@@ -20,7 +20,6 @@ logger = logging.getLogger('gunicorn.error')
 
 socketio = SocketIO()
 
-
 def authenticated_only(f):
     @functools.wraps(f)
     def wrapped(*args, **kwargs):
@@ -29,7 +28,6 @@ def authenticated_only(f):
         else:
             disconnect()
     return wrapped
-
 
 @socketio.on('annotation')
 @authenticated_only
@@ -128,4 +126,3 @@ def disconnect():
                     'active': False,
                     'username': current_user.username
                 }, broadcast=True, include_self=False)
-               

@@ -69,5 +69,4 @@ class Config:
 
     DEXTR_FILE = os.getenv("DEXTR_FILE", "/models/dextr_pascal-sbd.h5")
 
-
 __all__ = ["Config"]

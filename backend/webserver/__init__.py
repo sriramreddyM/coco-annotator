@@ -30,9 +30,7 @@ import logging
 import time
 import os
 
-
 connect_mongo('webserver')
-
 
 def create_app():
 

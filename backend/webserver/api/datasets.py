@@ -20,6 +20,7 @@ from database import (
 )
 
 import datetime
+import time
 import json
 import os
 
@@ -27,7 +28,6 @@ import logging
 logger = logging.getLogger('gunicorn.error')
 
 api = Namespace('dataset', description='Dataset related operations')
-
 
 dataset_create = reqparse.RequestParser()
 dataset_create.add_argument('name', required=True)
@@ -69,6 +69,8 @@ cs_data.add_argument('dummy', location='json', type=bool, default=False)
 
 dataset_refresh = reqparse.RequestParser()
 dataset_refresh.add_argument('dataset_id', location='json', type=int)
+
+dataset_stats = {}
 
 @api.route('/')
 class Dataset(Resource):
@@ -228,21 +230,44 @@ class DatasetcsStats(Resource):
     # @login_required
     def get(self, dataset_id):
         """ All users in the dataset """
+        global dataset_stats
+        if dataset_id in dataset_stats:
+            last_updated = dataset_stats[dataset_id]['last_updated']
+            present_time = datetime.datetime.now()
+            interval = present_time - last_updated
+            if interval.total_seconds() < 15:
+                logger.info('cs_stats fetched from variable')
+                cs_stats = dataset_stats[dataset_id]
+                return cs_stats
+            elif dataset_stats[dataset_id]['updating_now']:
+                while dataset_stats[dataset_id]['updating_now']:
+                    time.sleep(1)
+                logger.info('cs_stats waited and fetched from variable')
+                cs_stats = dataset_stats[dataset_id]
+                return cs_stats
+            else:
+                pass
 
-        dataset = current_user.datasets.filter(id=dataset_id, deleted=False).first()
-        if dataset is None:
-            return {"message": "Invalid dataset id"}, 400
+            dataset_stats[dataset_id]['updating_now'] = True
 
-        images = ImageModel.objects.filter(dataset_id=dataset.id, deleted=False).only('id')
-        num_images_cs_not_annotated = len(ImageModel.objects.filter(dataset_id=dataset.id, cs_annotated=[], deleted=False).only('id'))
+            dataset = current_user.datasets.filter(id=dataset_id, deleted=False).first()
+            if dataset is None:
+                return {"message": "Invalid dataset id"}, 400
 
-        cs_stats = {
-            'total': {
-                'Images': images.count(),
-                'CS Annotated Images': num_images_cs_not_annotated,
+            images = ImageModel.objects.filter(dataset_id=dataset.id, deleted=False).only('id')
+            num_images_cs_not_annotated = len(ImageModel.objects.filter(dataset_id=dataset.id, cs_annotated=[], deleted=False).only('id'))
+
+            cs_stats = {
+                'total': {
+                    'Images': images.count(),
+                    'CS Annotated Images': num_images_cs_not_annotated,
+                }
+                'last_updated': datetime.datetime.now()
+                'updating_now': False
             }
-        }
-        return cs_stats
+            dataset_stats[dataset_id] = cs_stats
+            logger.info('cs_stats fetched and write to variable')
+            return cs_stats
 
 @api.route('/<int:dataset_id>/cats')
 class DatasetCats(Resource):

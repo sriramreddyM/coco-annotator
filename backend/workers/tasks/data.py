@@ -19,6 +19,29 @@ from celery import shared_task
 from ..socket import create_socket
 from mongoengine import Q
 
+# @shared_task
+# def dataset_stats(task_id, dataset_id)
+
+#     socket = create_socket()
+#     while(True):
+#         task = TaskModel.objects.get(id=task_id)
+#         dataset = DatasetModel.objects.get(id=dataset_id)
+
+#         if dataset is None:
+#             return {"message": "Invalid dataset id"}, 400
+
+#         images = ImageModel.objects.filter(dataset_id=dataset.id, deleted=False).only('id')
+#         num_images_cs_not_annotated = len(ImageModel.objects.filter(dataset_id=dataset.id, cs_annotated=[], deleted=False).only('id'))
+
+#         cs_stats = {
+#             'total': {
+#                 'Images': images.count(),
+#                 'CS Annotated Images': num_images_cs_not_annotated,
+#             }
+#         }
+#         # return cs_stats
+#         socket.emit('csStats', cs_stats, broadcast=True)
+#         time.sleep(60)
 
 @shared_task
 def export_annotations(task_id, dataset_id, categories):
