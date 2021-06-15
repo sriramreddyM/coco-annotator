@@ -262,7 +262,7 @@ class DatasetcsStats(Resource):
                     'Images': images.count(),
                     'CS Annotated Images': num_images_cs_not_annotated,
                 }
-                'last_updated': datetime.datetime.now()
+                'last_updated': datetime.datetime.now(),
                 'updating_now': False
             }
             dataset_stats[dataset_id] = cs_stats
