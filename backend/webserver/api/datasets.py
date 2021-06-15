@@ -246,9 +246,9 @@ class DatasetcsStats(Resource):
                 cs_stats = dataset_stats[dataset_id]
                 return cs_stats
             else:
-                pass
-
-        dataset_stats[dataset_id]['updating_now'] = True
+                dataset_stats[dataset_id]['updating_now'] = True
+        else:
+            dataset_stats[dataset_id] = {'updating_now': True}
 
         dataset = current_user.datasets.filter(id=dataset_id, deleted=False).first()
         if dataset is None:
