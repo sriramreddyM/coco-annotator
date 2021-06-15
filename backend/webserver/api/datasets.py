@@ -238,15 +238,13 @@ class DatasetcsStats(Resource):
             if interval.total_seconds() < 15:
                 logger.info('cs_stats fetched from variable')
                 cs_stats = dataset_stats[dataset_id]
-                del cs_stats['last_updated']
-                return cs_stats
+                return {cs_stats['total']}
             elif dataset_stats[dataset_id]['updating_now']:
                 while dataset_stats[dataset_id]['updating_now']:
                     time.sleep(1)
                 logger.info('cs_stats waited and fetched from variable')
                 cs_stats = dataset_stats[dataset_id]
-                del cs_stats['last_updated']
-                return cs_stats
+                return {cs_stats['total']}
             else:
                 dataset_stats[dataset_id]['updating_now'] = True
         else:
@@ -269,8 +267,7 @@ class DatasetcsStats(Resource):
         }
         dataset_stats[dataset_id] = cs_stats
         logger.info('cs_stats fetched and write to variable')
-        del cs_stats['last_updated']
-        return cs_stats
+        return {cs_stats['total']}
 
 @api.route('/<int:dataset_id>/cats')
 class DatasetCats(Resource):
