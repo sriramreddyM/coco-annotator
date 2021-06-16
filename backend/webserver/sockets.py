@@ -32,6 +32,7 @@ def authenticated_only(f):
 @socketio.on('annotation')
 @authenticated_only
 def annotation(data):
+    logger.info('annotation data came')
     emit('annotation', data, broadcast=True)
 
 
