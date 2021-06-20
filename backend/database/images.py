@@ -101,7 +101,7 @@ class ImageModel(DynamicDocument):
         else:
             image.uploaded_by = "Anonymous"
         
-        if gps_data[0] is not None and gps_data[1] is not None:
+        if gps_data is not None:
             image.location = gps_data
 
         pil_image.close()
