@@ -68,8 +68,10 @@ class ImageModel(DynamicDocument):
     events = EmbeddedDocumentListField(Event)
     regenerate_thumbnail = BooleanField(default=False)
 
+    location = PointField()
+
     @classmethod
-    def create_from_path(cls, path, dataset_id=None, uploader=None):
+    def create_from_path(cls, path, dataset_id=None, uploader=None, gps_data=None):
 
         pil_image = Image.open(path)
 
@@ -80,6 +82,8 @@ class ImageModel(DynamicDocument):
         image.height = pil_image.size[1]
         image.regenerate_thumbnail = True
 
+        # to do
+        # get exif and to location
         if dataset_id is not None:
             image.dataset_id = dataset_id
         else:
@@ -95,7 +99,10 @@ class ImageModel(DynamicDocument):
         if uploader is not None:
             image.uploaded_by = uploader
         else:
-            image.uploaded_by = "System"
+            image.uploaded_by = "Anonymous"
+        
+        if gps_data is not None:
+            image.location = gps_data
 
         pil_image.close()
 

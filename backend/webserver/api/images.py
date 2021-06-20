@@ -32,6 +32,8 @@ image_upload.add_argument('image', location='files',
                           help='PNG or JPG file')
 image_upload.add_argument('dataset_id', required=True, type=int,
                           help='Id of dataset to insert image into')
+image_upload.add_argument('latitude', type=float, help='latitude of the image if exists')
+image_upload.add_argument('longitude', type=float, help='longitude of the image if exists')
 
 image_download = reqparse.RequestParser()
 image_download.add_argument('asAttachment', type=bool, default=False)
@@ -88,6 +90,8 @@ class Images(Resource):
         image = args['image']
 
         dataset_id = args['dataset_id']
+        latitude = args['latitude']
+        longitude = args['longitude']
         try:
             dataset = DatasetModel.objects.get(id=dataset_id)
         except:
@@ -108,7 +112,8 @@ class Images(Resource):
 
             image.close()
             pil_image.close()
-            db_image = ImageModel.create_from_path(path, dataset_id, current_user.username).save()
+            gps_point = [latitude, longitude]
+            db_image = ImageModel.create_from_path(path, dataset_id, current_user.username, gps_point).save()
             # to do @sriram
             # generate thubnail immediately after uploading
             return db_image.id

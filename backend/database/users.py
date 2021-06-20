@@ -14,6 +14,7 @@ class UserModel(DynamicDocument, UserMixin):
     password = StringField(required=True)
     username = StringField(max_length=25, required=True, unique=True)
     email = StringField(max_length=30)
+    country = StringField(max_length=20)
     # api_key = StringField(max_length=32)
 
     name = StringField()
@@ -24,6 +25,10 @@ class UserModel(DynamicDocument, UserMixin):
 
     preferences = DictField(default={})
     permissions = ListField(defualt=[])
+
+    cs_images = IntField(default=0)
+    cs_annotations = IntField(default=0)
+    cs_points = FloatField(defualt=0)
 
     # meta = {'allow_inheritance': True}
 
