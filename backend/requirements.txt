@@ -26,4 +26,4 @@ imgaug
 IPython[all]
 jupyter
 PyJWT==1.7.1
-mongoengine
+geojson

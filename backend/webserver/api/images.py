@@ -15,6 +15,8 @@ import datetime
 import os
 import io
 
+import Point from geojson
+
 import logging
 logger = logging.getLogger('gunicorn.error')
 
@@ -113,7 +115,7 @@ class Images(Resource):
             image.close()
             pil_image.close()
             if latitude is not None and longitude is not None:
-                gps_point = [latitude, longitude]
+                gps_point = Point((Decimal(latitude), Decimal(longitude)))
             else:
                 gps_point = None
             db_image = ImageModel.create_from_path(path, dataset_id, current_user.username, gps_point).save()
