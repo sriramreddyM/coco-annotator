@@ -15,6 +15,7 @@ import datetime
 import os
 import io
 
+from decimal import *
 from geojson import Point
 
 import logging
