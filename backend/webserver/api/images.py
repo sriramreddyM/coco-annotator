@@ -15,7 +15,7 @@ import datetime
 import os
 import io
 
-import Point from geojson
+from geojson import Point
 
 import logging
 logger = logging.getLogger('gunicorn.error')
