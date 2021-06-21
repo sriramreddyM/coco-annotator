@@ -68,7 +68,7 @@ class ImageModel(DynamicDocument):
     events = EmbeddedDocumentListField(Event)
     regenerate_thumbnail = BooleanField(default=False)
 
-    location = PointField()
+    location = GeoPointField()
 
     @classmethod
     def create_from_path(cls, path, dataset_id=None, uploader=None, gps_data=None):
