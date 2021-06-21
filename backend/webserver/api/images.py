@@ -15,7 +15,6 @@ import datetime
 import os
 import io
 
-from decimal import *
 from geojson import Point
 
 import logging
@@ -116,7 +115,7 @@ class Images(Resource):
             image.close()
             pil_image.close()
             if latitude is not None and longitude is not None:
-                gps_point = Point((Decimal(latitude), Decimal(longitude)))
+                gps_point = Point((float(latitude), float(longitude)))
             else:
                 gps_point = None
             db_image = ImageModel.create_from_path(path, dataset_id, current_user.username, gps_point).save()
