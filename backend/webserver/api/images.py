@@ -256,7 +256,7 @@ class ImageFlag(Resource):
 
     # @login_required
     @api.expect(flag_args)
-    def post(self, image_id):
+    def post(self):
         
         args = flag_args.parse_args()
         image_id = args.get('image_id')
@@ -271,7 +271,7 @@ class ImageApprove(Resource):
 
     @login_required
     @api.expect(approve_args)
-    def post(self, image_id):
+    def post(self):
         args = approve_args.parse_args()
         image_id = args.get('image_id')
         image = current_user.images.filter(id=image_id).first()
