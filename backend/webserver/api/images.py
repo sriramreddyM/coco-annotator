@@ -277,6 +277,7 @@ class ImageApprove(Resource):
         image = current_user.images.filter(id=image_id).first()
         image.update(set__approved_by=current_user.username)
         image_uploaded_by = image.uploaded_by
+        logger.info(f'uploaded by, {image_uploaded_by}')
         uploaded_user = UserModel.objects(username__iexact=image_uploaded_by).first()
         cs_images = uploaded_user.cs_images + 1
         uploaded_user.update(set__cs_images= cs_images)
