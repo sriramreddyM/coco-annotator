@@ -57,6 +57,7 @@ class ImageModel(DynamicDocument):
     coco_url = StringField()
     date_captured = DateTimeField()
     uploaded_by = StringField()
+    approved_by = StringField()
 
     metadata = DictField()
     license = IntField()

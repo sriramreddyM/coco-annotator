@@ -5,6 +5,7 @@ from flask import send_file
 
 from ..util import query_util, coco_util
 from database import (
+    UserModel,
     ImageModel,
     DatasetModel,
     AnnotationModel
@@ -54,6 +55,9 @@ image_updates.add_argument('is_annotations_added', location='json', type=bool, d
 flag_args = reqparse.RequestParser()
 flag_args.add_argument('image_id', location='json', type=int)
 flag_args.add_argument('is_flagged', location='json', type=bool, default=False)
+
+approve_args = reqparse.RequestParser()
+approve_args.add_argument('image_id', location='json', type=int)
 
 @api.route('/')
 class Images(Resource):
@@ -260,4 +264,20 @@ class ImageFlag(Resource):
         image = current_user.images.filter(id=image_id).first()
         if is_flag:
             image.update(add_to_set__cs_flagged_users=current_user.username)
+        return {'success': True}
+
+@api.route('/approve')
+class ImageApprove(Resource):
+
+    @login_required
+    @api.expect(approve_args)
+    def post(self, image_id):
+        args = approve_args.parse_args()
+        image_id = args.get('image_id')
+        image = current_user.images.filter(id=image_id).first()
+        image.update(set__approved_by=current_user.username)
+        image_uploaded_by = image.uploaded_by
+        uploaded_user = UserModel.objects(username__iexact=image_uploaded_by).first()
+        cs_images = uploaded_user.cs_images + 1
+        uploaded_user.update(set__cs_images= cs_images)
         return {'success': True}
