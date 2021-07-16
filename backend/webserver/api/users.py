@@ -188,3 +188,30 @@ class UserLive(Resource):
                 if td_mins <= 3:
                     live_count += 1
         return {'success': True, 'live_count': live_count}
+
+@api.route('/leaderboard')
+class Leaderboard(Resource):
+    # @login_required
+    def get(self):
+        all_users = UserModel.objects()
+        # apply filters
+        participants = 0
+        total_images = 0
+        total_annotations = 0
+        image_leaderboard = {}
+        annotation_leaderboard = {}
+        for user in all_users:
+            if user.cs_images:
+                image_leaderboard['user.username'] = user.cs_images
+                total_images += user.cs_images
+            if user.cs_annotations:
+                annotation_leaderboard['user.username'] = user.cs_annotations
+                total_annotations += user.cs_annotations
+
+        
+        leaderboard = {}
+        leaderboard['images'] = total_images
+        leaderboard['annotations'] = total_annotations
+
+
+        return {'success': True, 'leaderboard': leaderboard, 'image_chart': image_leaderboard, 'annotation_chart': annotation_leaderboard} 
