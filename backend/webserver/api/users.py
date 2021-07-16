@@ -155,7 +155,7 @@ class UserTokenLogin(Resource):
                 'exp': datetime.utcnow() + timedelta(minutes=300)},
                 Config.SECRET_KEY)
 
-            return jsonify({ 'token': token.decode('UTF-8') })
+            return jsonify({'success': True, 'user': user_json, 'token': token.decode('UTF-8') })
 
         return {'success': False, 'message': 'Could not authenticate user'}, 400
 
